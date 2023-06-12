@@ -4,6 +4,8 @@ import com.bakeng.crudapp.model.Employee;
 import com.bakeng.crudapp.repo.EmployeeRepo;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,12 +14,16 @@ import java.util.Optional;
 @Service
 public class EmployeeService {
     private EmployeeRepo employeeRepo;
+    PasswordEncoder passwordEncoder;
 
     public EmployeeService(EmployeeRepo employeeRepo) {
+        this.passwordEncoder = new BCryptPasswordEncoder();
         this.employeeRepo = employeeRepo;
     }
 
     public Employee createEmployee(Employee employee){
+        String encodedpassword = this.passwordEncoder.encode(employee.getPassword());
+        employee.setPassword(encodedpassword);
         return employeeRepo.save(employee);
     }
 
@@ -41,7 +47,10 @@ public class EmployeeService {
             oldEmp.setEmail(employee.getEmail());
             oldEmp.setFullName(employee.getFullName());
             oldEmp.setJobTitle(employee.getJobTitle());
-            oldEmp.setPassword(employee.getPassword());
+
+            String encodedpwd = this.passwordEncoder.encode(employee.getPassword());
+            oldEmp.setPassword(encodedpwd);
+
             employeeRepo.save(oldEmp);
         }else{
             return null;
